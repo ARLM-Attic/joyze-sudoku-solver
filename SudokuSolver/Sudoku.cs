@@ -10,74 +10,50 @@ namespace SudokuSolver
 
     class SudokuGame
     {
-        Queue<KnownValue> _foundQ;
-        public SudokuBoard Board;
+        public BoardChangeList ChangeList;
+        private SudokuBoard Board;
+        private int _changeStep;
         private int _debugStep;
 
         public SudokuGame()
         {
             Board = new SudokuBoard(new FoundHandler(this.FoundAnswer));
-            _foundQ = new Queue<KnownValue>(100);
-        }
-
-        public void Clear()
-        {
-            _foundQ.Clear();
-            Board.Clear();
+            ChangeList = new BoardChangeList();
         }
 
         public void Solve()
         {
-            UpdateBoard();
+            Board.Reset();
+
+            _changeStep = 0;
             _debugStep = 0;
 
-            //solve remaining unknowns
             while (FindAnswers()) ;
         }
 
-        private void UpdateBoard()
+
+        private bool FindAnswers()
         {
-            // reset all unknowns to include 1..9
-            for (int row = 0; row < 9; row++)
-                for (int col = 0; col < 9; col++)
-                    if (!Board[row, col].IsKnownValue())
-                        Board[row, col].AddOneToNine();
-
-            //for each given known puzzle value, reduce possibilities in rows, column and blocks
-            for (int row = 0; row < 9; row++)
-                for (int col = 0; col < 9; col++)
-                    if (Board[row, col].IsKnownValue())
-                        ReducePossibilities(new KnownValue(row, col, Board[row, col].Value));
-        }
-
-
-
-
-        public bool FindAnswers()
-        {
-            int possibles = Board.CountPossibles();
-
             _debugStep++;
             Debug.WriteLine("step " + _debugStep);
 
+            //process all board state changes before searching for new changes to make
 
-            //process all discovered knowns
-            
-            if (_foundQ.Count > 0)
+            if (ChangeList.Count > _changeStep)
             {
-                KnownValue kn;
-
-                kn = _foundQ.Dequeue();
-                ReducePossibilities(kn);
+                Board.Process(ChangeList[_changeStep]);
+                _changeStep++;
                 return true;
             }
              
+            // check if we're finished
 
             if (Board.CountPossibles() == 81)
             {
-                // we're finished!
                 return false;
             }
+
+            // otherwise search out new board state changes to make
 
             if (Search(new SearchStrategy(SearchSinglePinInRun)))
                 return true;
@@ -94,25 +70,11 @@ namespace SudokuSolver
         private void FoundAnswer(int row, int col, int value)
         {
             // called whenever an answer is found via reduction
-            _foundQ.Enqueue(new KnownValue(row, col, value));
-            //ReducePossibilities(new KnownValue(row, col, value));
+            ChangeList.AddKnown(row, col, value);
             Debug.WriteLine("found answer " + value.ToString() + " at (" + row.ToString() + "," + col.ToString() + ")");
         }
 
-        private void ReducePossibilities(KnownValue known)
-        {
-            // for a given square, reduce a values in the other squares in its row, column and block
-            Debug.WriteLine("reduce " + known.Value.ToString() + " at (" + known.Row.ToString() + "," + known.Col.ToString() + ")");
-            ReduceRun(new SquareRun(Board, SquareRun.SquareRunType.RowRun, known.Row), known.Value);
-            ReduceRun(new SquareRun(Board, SquareRun.SquareRunType.ColumnRun, known.Col), known.Value);
-            ReduceRun(new SquareRun(Board, SquareRun.SquareRunType.BlockRun, SquareRun.BlockContaining(known.Row, known.Col)), known.Value);
-        }
 
-        private void ReduceRun(SquareRun square, int value)
-        {
-            for (int i = 0; i < 9; i++)
-                square[i].Reduce(value);
-        }
 
         private bool Search(SearchStrategy searchFunc)
         {
@@ -150,7 +112,7 @@ namespace SudokuSolver
         public bool SearchSinglePinInRun(SquareRun square)
         {
             // if a number can only occur in one square in a run and that square isn't already
-            // set as a known value, then set it and queue the discovery
+            // set as a known value, then queue the discovery
 
             int digitCount;
             PossibleSet single;
@@ -174,7 +136,8 @@ namespace SudokuSolver
                     if (!single.IsKnownValue())
                     {
                         Debug.WriteLine("SearchSinglePinInRun found " + single.ToDebugString());
-                        single.SetKnownValueFound(digit);
+                        ChangeList.AddKnown(single.Row, single.Column, digit);
+                        //single.SetKnownValueFound(digit);
                         return true;
                     }
                 }

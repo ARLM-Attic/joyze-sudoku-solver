@@ -109,11 +109,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Board.cs" />
+    <Compile Include="BoardChangeList.cs" />
+    <Compile Include="BoardStateChange.cs" />
+    <Compile Include="BoardViewModel.cs" />
     <Compile Include="Debug.cs" />
     <Compile Include="DebugWindow.xaml.cs">
       <DependentUpon>DebugWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="KnownValue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -128,6 +130,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="SquareRun.cs" />
+    <Compile Include="SquareViewModel.cs" />
     <Compile Include="Sudoku.cs" />
     <Compile Include="PossibleSet.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">

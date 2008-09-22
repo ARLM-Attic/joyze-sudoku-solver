@@ -21,6 +21,8 @@ namespace SudokuSolver
     {
         Border KeyboardBorderFocus;
         SudokuGame sudoku = new SudokuGame();
+        BoardViewModel board = new BoardViewModel();
+        int sudokuStep;
 
         public Window1()
         {
@@ -51,10 +53,16 @@ namespace SudokuSolver
 
                     SetFontSize(sqBorder);
 
-                    // add square to grid
+                    // add border to grid
                     Grid.SetRow(sqBorder, row);
                     Grid.SetColumn(sqBorder, col);
                     PuzzleGrid.Children.Add(sqBorder);
+
+                    // bind textblock to Board/Square view model
+                    Binding bind = new Binding();
+                    bind.Source = board[row, col];
+                    bind.Path = new PropertyPath("Value");
+                    sqText.SetBinding(TextBlock.TextProperty, bind);
                 }
         }
 
@@ -106,18 +114,8 @@ namespace SudokuSolver
             return new Thickness(left, top, right, bottom);
         }
 
-        private void SetFontSize(Border border)
-        {
-            TextBlock tb = ((TextBlock)border.Child);
-            if (tb.Text.Length < 2)
-                tb.FontSize = PuzzleGrid.ActualHeight / 13;
-            else
-                tb.FontSize = PuzzleGrid.ActualHeight / 39;
-        }
 
-        private void SetBackground(Border border)
-        {
-        }
+
 
         /// ==================================================================================
         /// Keyboard Input Handling
@@ -128,25 +126,29 @@ namespace SudokuSolver
             //only process keys if we have a square with input focus
             if (KeyboardBorderFocus != null)
             {
-                TextBlock tb = (TextBlock)KeyboardBorderFocus.Child;
+                string key;
 
                 //standard numeric keys 1 to 9
                 if (e.Key > Key.D0 && e.Key <= Key.D9)
                 {
                     KeyConverter k = new KeyConverter();
-                    tb.Text = k.ConvertToString(e.Key);
+                    key = k.ConvertToString(e.Key);
                 }
                 //number pad keys 1 to 9
                 else if (e.Key > Key.NumPad0 && e.Key <= Key.NumPad9)
                 {
                     KeyConverter k = new KeyConverter();
-                    tb.Text = (k.ConvertToString(e.Key)).Remove(0, 6);
+                    key = (k.ConvertToString(e.Key)).Remove(0, 6);
                 }
                 //use anything to clear
                 else
-                    tb.Text = "";
+                    key = String.Empty;
 
-                ProcessSquares(new SquareOperation(ClearUnknownSquares));
+                //change the BoardViewModel
+                int row = Grid.GetRow(KeyboardBorderFocus);
+                int col = Grid.GetColumn(KeyboardBorderFocus);
+                board[row, col].Value = key;
+
                 SetFontSize(KeyboardBorderFocus);
             }
         }
@@ -181,49 +183,13 @@ namespace SudokuSolver
             }
         }
 
-        private void ClearSquares(Border border)
+        private void SetFontSize(Border border)
         {
             TextBlock tb = ((TextBlock)border.Child);
-            tb.Text = String.Empty;
-            tb.Background = Brushes.Transparent;
-            SetFontSize(border);
-        }
-
-        private void ClearUnknownSquares(Border border)
-        {
-            TextBlock tb = ((TextBlock)border.Child);
-            if (tb.Text.Length > 1)
-            {
-                tb.Text = String.Empty;
-            }
-        }
-
-
-        private void CopySquareToBoard(Border border)
-        {
-            int row = Grid.GetRow(border);
-            int col = Grid.GetColumn(border);
-            TextBlock tb = ((TextBlock)border.Child);
-            if (tb.Text != String.Empty)
-            {
-                int val = Convert.ToInt32(tb.Text);
-                sudoku.Board[row, col].SetKnownValue(val);
-                //tb.Background = Brushes.AliceBlue;
-            }
-        }
-
-        private void CopyBoardToSquare(Border border)
-        {
-            int row = Grid.GetRow(border);
-            int col = Grid.GetColumn(border);
-            TextBlock tb = ((TextBlock)border.Child);
-            tb.Text = sudoku.Board[row, col].ToString(); ;
-            SetFontSize(border);
-        }
-
-        private void CopyBoardToGrid()
-        {
-            ProcessSquares(new SquareOperation(CopyBoardToSquare));
+            if (tb.Text.Length < 2)
+                tb.FontSize = PuzzleGrid.ActualHeight / 13;
+            else
+                tb.FontSize = PuzzleGrid.ActualHeight / 39;
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -237,21 +203,33 @@ namespace SudokuSolver
 
         private void cmdSolve_Click(object sender, RoutedEventArgs e)
         {
-            ProcessSquares(new SquareOperation(CopySquareToBoard));
-            sudoku.Solve();
-            CopyBoardToGrid();
+            if (sudoku.ChangeList.Count == 0)
+            {
+                board.Write(sudoku.ChangeList);
+                sudoku.Solve();
+            }
+            board.Read(sudoku.ChangeList);
+            cmdStep.IsEnabled = false;
         }
 
         private void cmdClear_Click(object sender, RoutedEventArgs e)
         {
-            sudoku.Clear();
-            ProcessSquares(new SquareOperation(ClearSquares));
+            board.Reset();
+            sudoku.ChangeList.Clear();
+            cmdStep.IsEnabled = true;
         }
 
         private void cmdStep_Click(object sender, RoutedEventArgs e)
         {
-            sudoku.FindAnswers();
-            CopyBoardToGrid();
+            if (sudoku.ChangeList.Count == 0)
+            {
+                sudokuStep = board.Write(sudoku.ChangeList);
+                sudoku.Solve();
+            }
+
+            if (sudokuStep < sudoku.ChangeList.Count)
+                board.Read(sudoku.ChangeList, sudokuStep++);
+
         }
     }
 }

@@ -136,6 +136,7 @@ namespace SudokuSolver
         public void AddOneToNine()
         {
             SetAllValues(true);
+            _known = false;
             _count = 9;
         }
 

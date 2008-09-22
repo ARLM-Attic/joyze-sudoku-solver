@@ -38,6 +38,7 @@
             <StackPanel  x:Name="CommandPanel"  Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Right">
       
                 <Button Height="25" x:Name="cmdClear" Width="70" Content="Clear" Margin="0,0,20,0" Click="cmdClear_Click" />
+                <Button Height="25" x:Name="cmdStep" Width="70" Content="Step" Margin="0,0,20,0" Click="cmdStep_Click" />
                 <Button Height="25" x:Name="cmdSolve" Width="70" Content="Solve" Margin="0,0,20,0" IsDefault="True" Click="cmdSolve_Click" />
             </StackPanel>
         </Border>
