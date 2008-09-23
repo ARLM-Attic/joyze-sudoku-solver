@@ -147,7 +147,9 @@ namespace SudokuSolver
                 //change the BoardViewModel
                 int row = Grid.GetRow(KeyboardBorderFocus);
                 int col = Grid.GetColumn(KeyboardBorderFocus);
-                board[row, col].Value = key;
+
+                if (board.IsValid(row,col,key))
+                    board[row, col].Value = key;
 
                 SetFontSize(KeyboardBorderFocus);
             }

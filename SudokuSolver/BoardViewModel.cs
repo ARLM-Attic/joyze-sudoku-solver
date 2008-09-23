@@ -41,8 +41,7 @@ namespace SudokuSolver
                     SquareViewModel sq = _square[row, col];
                     if (sq.Value != String.Empty)
                     {
-                        int val = Convert.ToInt32(sq.Value);
-                        changes.AddKnown(row, col, val);
+                        changes.AddKnown(row, col, sq.ToInt());
                     }
                 }
             return changes.Count;
@@ -53,6 +52,48 @@ namespace SudokuSolver
             for (int row = 0; row < 9; row++)
                 for (int col = 0; col < 9; col++)
                     _square[row, col].Reset();
+        }
+
+        private bool[] Candidates(int row, int col)
+        {
+            bool[] digits = new bool[10];
+
+            // start with all digits that can occur
+            for (int digit = 0; digit < 10; digit++)
+                digits[digit] = true;
+
+            // remove digits that occur in the column
+            for (int i = 0; i < 9; i++)
+                if (this[i,col].Value != String.Empty)
+                    digits[this[i,col].ToInt()] = false;
+
+            // remove digits that occur in the row
+            for (int j = 0; j < 9; j++)
+                if (this[row,j].Value != String.Empty)
+                    digits[this[row, j].ToInt()] = false;
+
+            // remove digits that occur in the block
+            int block = BlockMap.BlockContaining(row, col);
+            for (int offset = 0; offset < 9; offset++)
+            {
+                SquareViewModel square = this[BlockMap.Row(block, offset),BlockMap.Column(block,offset)];
+                if (square.Value != String.Empty)
+                    digits[square.ToInt()] = false;
+            }
+                
+            return digits;
+        }
+
+        public bool IsValid(int row, int col, string value)
+        {
+            if (value != String.Empty)
+            {
+                bool[] digits = Candidates(row, col);
+                int val = Convert.ToInt32(value);
+                return digits[val];
+            }
+            else
+                return true;
         }
 
         public SquareViewModel this[int row, int col]

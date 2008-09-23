@@ -33,6 +33,14 @@ namespace SudokuSolver
             }
         }
 
+        public int ToInt()
+        {
+            if (_value != String.Empty)
+                return Convert.ToInt32(this.Value);
+            else
+                return 0;
+        }
+
         public void Reset()
         {
             this.Value = String.Empty;

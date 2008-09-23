@@ -108,6 +108,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BlockMap.cs" />
     <Compile Include="Board.cs" />
     <Compile Include="BoardChangeList.cs" />
     <Compile Include="BoardStateChange.cs" />

@@ -21,9 +21,9 @@ namespace SudokuSolver
         // calculation structures to simplify mapping
 
         // _mapBlockToRowCol is used to map from a block number to the top, left row/col.
-        int[,] _mapBlockToRowCol = { { 0, 0 }, { 0, 3 }, { 0, 6 }, { 3, 0 }, { 3, 3 }, { 3, 6 }, { 6, 0 }, { 6, 3 }, { 6, 6 } };
+        //int[,] _mapBlockToRowCol = { { 0, 0 }, { 0, 3 }, { 0, 6 }, { 3, 0 }, { 3, 3 }, { 3, 6 }, { 6, 0 }, { 6, 3 }, { 6, 6 } };
         // _mapOffsetToRowCol is used to map from an index along a run (offset) to the distance from the top left of the block
-        int[,] _mapOffsetToRowCol = { { 0, 0 }, { 0, 1 }, { 0, 2 }, { 1, 0 }, { 1, 1 }, { 1, 2 }, { 2, 0 }, { 2, 1 }, { 2, 2 } };
+        //int[,] _mapOffsetToRowCol = { { 0, 0 }, { 0, 1 }, { 0, 2 }, { 1, 0 }, { 1, 1 }, { 1, 2 }, { 2, 0 }, { 2, 1 }, { 2, 2 } };
 
         private SquareRunType _runtype;
         private SudokuBoard _board;
@@ -38,7 +38,7 @@ namespace SudokuSolver
 
         public static int BlockContaining(int row, int column)
         {
-            return (row / 3) * 3 + (column / 3);
+            return BlockMap.BlockContaining(row, column);
         }
 
         public SquareRun(SudokuBoard board, SquareRunType runtype, int position)
@@ -64,8 +64,8 @@ namespace SudokuSolver
                     break;
                 case SquareRunType.BlockRun:
                     _block = position;
-                    _row = _mapBlockToRowCol[_block, 0];
-                    _column = _mapBlockToRowCol[_block, 1];
+                    //_row = BlockMap.BlockTopRow(_block);
+                    //_column = BlockMap.BlockLeftColumn(_block);
                     
                     break;
             }
@@ -98,11 +98,8 @@ namespace SudokuSolver
                             return _board[offset, _column];
 
                     case SquareRunType.BlockRun:
-                        // square numbers within a block:
-                        // 0 1 2
-                        // 3 4 5
-                        // 6 7 8
-                        return _board[_row + _mapOffsetToRowCol[offset, 0], _column + _mapOffsetToRowCol[offset, 1]];
+
+                        return _board[BlockMap.Row(_block,offset), BlockMap.Column(_block,offset)];
                 }
 
                 return null;
@@ -119,12 +116,14 @@ namespace SudokuSolver
             if (include[include.Length - 1] - include[0] > 3)
             {
                 // we have a sub column
-                int col = _column + _mapOffsetToRowCol[include[0], 1];
+                //int col = _column + _mapOffsetToRowCol[include[0], 1];
+                int col = BlockMap.Column(_block, include[0]);
                 return new SquareRun(_board, SquareRunType.ColumnRun, col);
             }
             else // we have a sub row
             {
-                int row = _row + _mapOffsetToRowCol[include[0], 0];
+                //int row = _row + _mapOffsetToRowCol[include[0], 0];
+                int row = BlockMap.Row(_block, include[0]);
                 return new SquareRun(_board, SquareRunType.RowRun, row);
             }
         }
@@ -136,14 +135,16 @@ namespace SudokuSolver
             if (this._runtype == SquareRunType.RowRun)
             {
                 _exclude = new int[3];
-                _exclude[0] = _mapBlockToRowCol[blockrun._block, 1];
+                //_exclude[0] = _mapBlockToRowCol[blockrun._block, 1];
+                _exclude[0] = BlockMap.BlockLeftColumn(blockrun._block);
                 _exclude[1] = _exclude[0] + 1;
                 _exclude[2] = _exclude[0] + 2;
             }
             else if (this._runtype == SquareRunType.ColumnRun)
             {
                 _exclude = new int[3];
-                _exclude[0] = _mapBlockToRowCol[blockrun._block, 0];
+                //_exclude[0] = _mapBlockToRowCol[blockrun._block, 0];
+                _exclude[0] = BlockMap.BlockTopRow(blockrun._block);
                 _exclude[1] = _exclude[0] + 1;
                 _exclude[2] = _exclude[0] + 2;
             }
