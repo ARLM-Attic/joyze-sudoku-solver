@@ -17,15 +17,42 @@ namespace SudokuSolver
                 PropertyChanged(this, new PropertyChangedEventArgs(propname));
         }
 
-        private string _value = String.Empty;
 
         public SquareViewModel()
         {
+            _candidates = new PossibleSet(0, 0, null);
         }
 
+        private bool _isstart = false;
+        public bool IsStart
+        {
+            get { return _isstart; }
+            set { _isstart = value; }
+        }
+
+        private bool _isknown = false;
+        public bool IsKnown
+        {
+            get { return _isknown; }
+            set { _isknown = value; }
+        }
+
+        private PossibleSet _candidates;
+        public PossibleSet Candidates
+        {
+            get { return _candidates; }
+        }
+
+        private string _value = String.Empty;
         public string Value
         {
-            get { return _value; }
+            get
+            {
+                if (_value == String.Empty && GameSettings.Settings.IsCandidatesDisplayed)
+                    return _candidates.ToString();
+                else
+                    return _value;
+            }
             set
             {
                 _value = value;
@@ -33,17 +60,25 @@ namespace SudokuSolver
             }
         }
 
+        public void Refresh()
+        {
+            Notify("Value");
+        }
+
         public int ToInt()
         {
             if (_value != String.Empty)
-                return Convert.ToInt32(this.Value);
+                return Convert.ToInt32(this._value);
             else
                 return 0;
         }
 
         public void Reset()
         {
+            this._candidates.Clear();
             this.Value = String.Empty;
+            this.IsKnown = false;
+            this.IsStart = false;
         }
 
     }

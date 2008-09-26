@@ -26,9 +26,7 @@ namespace SudokuSolver
             _col = col;
             _foundCallBack = func;
             _digits = new bool[10];
-            _known = false;
-            _count = 0;
-            SetAllValues(false);
+            Clear();
         }
 
         public int Count {get { return _count; } }
@@ -131,6 +129,13 @@ namespace SudokuSolver
         public string ToDebugString()
         {
             return this.ToString() + " @ (" + this.Row + "," + this.Column + ")";
+        }
+
+        public void Clear()
+        {
+            SetAllValues(false);
+            _known = false;
+            _count = 0;
         }
 
         public void AddOneToNine()

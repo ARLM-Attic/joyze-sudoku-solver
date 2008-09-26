@@ -18,13 +18,6 @@ namespace SudokuSolver
         // 3 4 5
         // 6 7 8
 
-        // calculation structures to simplify mapping
-
-        // _mapBlockToRowCol is used to map from a block number to the top, left row/col.
-        //int[,] _mapBlockToRowCol = { { 0, 0 }, { 0, 3 }, { 0, 6 }, { 3, 0 }, { 3, 3 }, { 3, 6 }, { 6, 0 }, { 6, 3 }, { 6, 6 } };
-        // _mapOffsetToRowCol is used to map from an index along a run (offset) to the distance from the top left of the block
-        //int[,] _mapOffsetToRowCol = { { 0, 0 }, { 0, 1 }, { 0, 2 }, { 1, 0 }, { 1, 1 }, { 1, 2 }, { 2, 0 }, { 2, 1 }, { 2, 2 } };
-
         private SquareRunType _runtype;
         private SudokuBoard _board;
         private int _row;
@@ -45,7 +38,6 @@ namespace SudokuSolver
         {
             if ((position < 0 || position > 8) || board == null)
             {
-                //throw exception
                 throw new ArgumentException("invalid SquareRun constructor call");
             }
 
@@ -77,8 +69,7 @@ namespace SudokuSolver
             {
                 if (offset < 0 || offset > 8)
                 {
-                    //throw exception
-                    return null;
+                    throw new ArgumentException("invalid offset parameter");
                 }
 
                 switch (_runtype)

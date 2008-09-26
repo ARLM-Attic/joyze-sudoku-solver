@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
@@ -15,21 +16,31 @@ namespace SudokuSolver
             for (int row = 0; row < 9; row++)
                 for (int col = 0; col < 9; col++)
                     _square[row, col] = new SquareViewModel();
+
+            //watch for game settings changes
+            GameSettings.Settings.PropertyChanged += settings_PropertyChanged;
         }
 
         public void Read(BoardChangeList changes)
         {
             for (int i = 0; i < changes.Count; i++)
             {
-                _square[changes[i].Row, changes[i].Col].Value = changes[i].Value.ToString();
+                SquareViewModel sq = _square[changes[i].Row, changes[i].Col];
+                sq.IsKnown = true;
+                sq.Value = changes[i].Value.ToString();
             }
         }
 
         public void Read(BoardChangeList changes, int step)
         {
             if (step >= 0 && step < changes.Count)
-                _square[changes[step].Row, changes[step].Col].Value = changes[step].Value.ToString();
-
+            {
+                SquareViewModel sq = _square[changes[step].Row, changes[step].Col];
+                sq.IsKnown = true;
+                sq.Value = changes[step].Value.ToString();
+            }
+            if (GameSettings.Settings.IsCandidatesDisplayed)
+                SetCandidates();
         }
 
         public int Write(BoardChangeList changes)
@@ -39,7 +50,7 @@ namespace SudokuSolver
                 for (int col = 0; col < 9; col++)
                 {
                     SquareViewModel sq = _square[row, col];
-                    if (sq.Value != String.Empty)
+                    if (sq.Value != String.Empty && sq.IsStart)
                     {
                         changes.AddKnown(row, col, sq.ToInt());
                     }
@@ -54,7 +65,15 @@ namespace SudokuSolver
                     _square[row, col].Reset();
         }
 
-        private bool[] Candidates(int row, int col)
+        public void ResetToStart()
+        {
+            for (int row = 0; row < 9; row++)
+                for (int col = 0; col < 9; col++)
+                    if (!_square[row,col].IsStart)
+                        _square[row, col].Reset();
+        }
+
+        private bool[] CalcCandidates(int row, int col)
         {
             bool[] digits = new bool[10];
 
@@ -88,7 +107,7 @@ namespace SudokuSolver
         {
             if (value != String.Empty)
             {
-                bool[] digits = Candidates(row, col);
+                bool[] digits = CalcCandidates(row, col);
                 int val = Convert.ToInt32(value);
                 return digits[val];
             }
@@ -99,6 +118,44 @@ namespace SudokuSolver
         public SquareViewModel this[int row, int col]
         {
             get { return _square[row, col] ; }
-        }   
+        }
+
+        public void Square_Changed()
+        {
+        }
+
+        void settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case "IsCandidatesDisplayed":
+
+                    if (GameSettings.Settings.IsCandidatesDisplayed)
+                        SetCandidates();
+
+                    for (int row = 0; row < 9; row++)
+                        for (int col = 0; col < 9; col++)
+                            _square[row, col].Refresh();
+                    break;
+            }
+        }
+
+        private void SetCandidates()
+        {
+            for (int row = 0; row < 9; row++)
+                for (int col = 0; col < 9; col++)
+                {
+                    SquareViewModel sq = _square[row, col];
+                    bool[] digits = CalcCandidates(row, col);
+                    sq.Candidates.Clear();
+                    for (int i = 1; i < 10; i++)
+                    {
+                        if (digits[i])
+                            sq.Candidates.Add(i);
+                    }
+                    sq.Refresh();
+                }
+        }
+
     }
 }
