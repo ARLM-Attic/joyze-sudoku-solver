@@ -73,28 +73,39 @@ namespace SudokuSolver
                 }
         }
 
+        private Thickness CalcGridLineThickness(Border border)
+        {
+            int row = Grid.GetRow(border);
+            int col = Grid.GetColumn(border);
+
+            return CalcGridLineThickness(row, col);
+        }
+
         private Thickness CalcGridLineThickness(int row, int col)
         {
             // make a standard sudoku grid
+
             int top, left, right, bottom = 0;
+            int thick = (int) (_puzzleGrid.ActualHeight + _puzzleGrid.ActualWidth) / 300;
+            int thin = thick / 2;
 
             switch (row)
             {
                 case 0:
                 case 3:
                 case 6:
-                    top = 2;
-                    bottom = 1;
+                    top = thick;
+                    bottom = thin;
                     break;
                 case 2:
                 case 5:
                 case 8:
-                    top = 1;
-                    bottom = 2;
+                    top = thin;
+                    bottom = thick;
                     break;
                 default:
-                    top = 1;
-                    bottom = 1;
+                    top = thin;
+                    bottom = thin;
                     break;
             }
 
@@ -103,18 +114,18 @@ namespace SudokuSolver
                 case 0:
                 case 3:
                 case 6:
-                    left = 2;
-                    right = 1;
+                    left = thick;
+                    right = thin;
                     break;
                 case 2:
                 case 5:
                 case 8:
-                    left = 1;
-                    right = 2;
+                    left = thin;
+                    right = thick;
                     break;
                 default:
-                    left = 1;
-                    right = 1;
+                    left = thin;
+                    right = thin;
                     break;
             }
 
@@ -122,12 +133,30 @@ namespace SudokuSolver
         }
 
         /// ==================================================================================
-        /// Event Handling
+        /// Properties
+        /// ==================================================================================
+
+        public enum PuzzleMode { Design, Play, Examine };
+
+        private PuzzleMode _puzzleMode;
+
+        public PuzzleMode Mode
+        {
+            get { return _puzzleMode; }
+            set
+            {
+                _puzzleMode = value;
+                ClearFocusSquare();
+            }
+        }
+
+        /// ==================================================================================
+        /// Key Input Handling
         /// ==================================================================================
         
-        public void KeyPress(string key, Window1.GameMode puzzleMode)
+        public void KeyPress(string key)
         {
-            if (_KeyboardBorderFocus != null)
+            if (this.Mode == PuzzleMode.Design && _KeyboardBorderFocus != null)
             {
                 //change the BoardViewModel
                 int row = Grid.GetRow(_KeyboardBorderFocus);
@@ -135,12 +164,9 @@ namespace SudokuSolver
 
                 if (_board.IsValid(row, col, key))
                 {
+                    _board[row, col].IsKnown = true;
+                    _board[row, col].IsStart = true;
                     _board[row, col].Value = key;
-                    if (puzzleMode == Window1.GameMode.EnterPuzzle)
-                    {
-                        _board[row, col].IsStart = true;
-                        _board[row, col].IsKnown = true;
-                    }
                 }
                 SetFontSize(_KeyboardBorderFocus);
             }
@@ -148,16 +174,34 @@ namespace SudokuSolver
 
         private void Square_MouseEnter(object sender, MouseEventArgs e)
         {
-            _KeyboardBorderFocus = (Border)sender;
-            _KeyboardBorderFocus.Background = Brushes.Yellow;
+            if (this.Mode == PuzzleMode.Design)
+            {
+                _KeyboardBorderFocus = (Border)sender;
+                _KeyboardBorderFocus.Background = Brushes.Yellow;
+            }
         }
 
         private void Square_MouseLeave(object sender, MouseEventArgs e)
         {
-            ((Border)sender).Background = Brushes.White;
-            _KeyboardBorderFocus = null;
+            if (this.Mode == PuzzleMode.Design)
+            {
+                ClearFocusSquare();
+            }
         }
 
+        private void ClearFocusSquare()
+        {
+            if (_KeyboardBorderFocus != null)
+            {
+                ((Border)_KeyboardBorderFocus).Background = Brushes.White;
+                _KeyboardBorderFocus = null;
+            }
+        }
+
+        /// ==================================================================================
+        /// Square Format Handling
+        /// ==================================================================================
+        
         delegate void SquareOperation(Border border);
 
         private void ProcessSquares(SquareOperation func)
@@ -172,6 +216,17 @@ namespace SudokuSolver
             }
         }
 
+        private void Resize(Border border)
+        {
+            SetFontSize(border);
+            SetBorderThickness(border);
+        }
+
+        private void SetBorderThickness(Border border)
+        {
+            border.BorderThickness = CalcGridLineThickness(border);
+        }
+
         private void SetFontSize(Border border)
         {
             int row = Grid.GetRow(border);
@@ -184,9 +239,21 @@ namespace SudokuSolver
                 tb.FontSize = _puzzleGrid.ActualHeight / 39;
         }
 
+        private void SetFontColour(Border border)
+        {
+            int row = Grid.GetRow(border);
+            int col = Grid.GetColumn(border);
+
+            TextBlock tb = ((TextBlock)border.Child);
+            if (_board[row, col].IsStart)
+                tb.Foreground = Brushes.DarkBlue;
+            else
+                tb.Foreground = Brushes.Black;
+        }
+
         public void SizeChanged()
         {
-            ProcessSquares(new SquareOperation(SetFontSize));
+            ProcessSquares(new SquareOperation(Resize));
         }
 
         void square_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -194,7 +261,9 @@ namespace SudokuSolver
             switch (e.PropertyName)
             {
                 case "Value":
-                    SetFontSize(FindPuzzleSquare((SquareViewModel)sender));
+                    Border bdr = FindPuzzleSquare((SquareViewModel)sender);
+                    SetFontSize(bdr);
+                    SetFontColour(bdr);
                     break;
             }
         }

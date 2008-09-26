@@ -40,6 +40,7 @@ namespace SudokuSolver
         private void WindowLoaded(object sender, RoutedEventArgs e)
         {
             _puzzle = new PuzzlePresenter(PuzzleGrid, _board);
+            _puzzle.Mode = PuzzlePresenter.PuzzleMode.Design;
 
             SetControlStates();
         }
@@ -93,7 +94,7 @@ namespace SudokuSolver
                 key = String.Empty;
 
             //let the puzzle take the input
-            _puzzle.KeyPress(key, _puzzleMode);
+            _puzzle.KeyPress(key);
         }
 
 
@@ -116,12 +117,15 @@ namespace SudokuSolver
                 _sudoku.Solve();
                 _board.ResetToStart();
                 _puzzleMode = GameMode.Play;
+                _puzzle.Mode = PuzzlePresenter.PuzzleMode.Play;
+
             }
             else if (_puzzleMode == GameMode.Play)
             {
                 // display solution and end play
                 _board.Read(_sudoku.ChangeList);
                 _puzzleMode = GameMode.EndPlay;
+                _puzzle.Mode = PuzzlePresenter.PuzzleMode.Examine;
             }
 
             SetControlStates();
@@ -132,6 +136,7 @@ namespace SudokuSolver
             _board.Reset();
             _sudoku.ChangeList.Clear();
             _puzzleMode = GameMode.EnterPuzzle;
+            _puzzle.Mode = PuzzlePresenter.PuzzleMode.Design;
             SetControlStates();
         }
 
@@ -145,6 +150,7 @@ namespace SudokuSolver
                 if (_sudokuStep == _sudoku.ChangeList.Count)
                 {
                     _puzzleMode = GameMode.EndPlay;
+                    _puzzle.Mode = PuzzlePresenter.PuzzleMode.Examine;
                     SetControlStates();
                 }
             }
