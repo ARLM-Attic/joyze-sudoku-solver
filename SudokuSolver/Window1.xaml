@@ -3,6 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Joyze Sudoku Solver"  SizeToContent="WidthAndHeight" Topmost="True" Height="500" Icon="sudoku.ico"
     MinWidth="400" MinHeight="500" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="401" Loaded="WindowLoaded" SizeChanged="Window_SizeChanged">
+
     <Grid MinWidth="200" Background="#FF93C4D9">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" MinHeight="200"/>
@@ -10,7 +11,17 @@
         </Grid.RowDefinitions>
 		<Border Grid.Row="0" x:Name="PuzzleBorder" BorderBrush="#FF000000" BorderThickness="2,2,2,2" CornerRadius="2,2,2,2" Margin="4,4,4,4" Background="#FFFFFFFF">
 	        <Grid x:Name="PuzzleGrid" ShowGridLines="False" SnapsToDevicePixels="False" Margin="0,0,0,0" >
-	            <Grid.ColumnDefinitions>
+                <Grid.Resources>
+                    <Storyboard x:Key="Flash">
+                        <ColorAnimationUsingKeyFrames BeginTime="00:00:00" x:Name="ColourCycle" FillBehavior="Stop" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" >
+                            <DiscreteColorKeyFrame  KeyTime="00:00:00.0000000" Value="Red"/>
+                            <DiscreteColorKeyFrame  KeyTime="00:00:00.1500000" Value="White"/>
+                            <DiscreteColorKeyFrame  KeyTime="00:00:00.3000000" Value="Red"/>
+                            <DiscreteColorKeyFrame  KeyTime="00:00:00.4500000" Value="White"/>
+                        </ColorAnimationUsingKeyFrames>
+                    </Storyboard>
+                </Grid.Resources>
+                <Grid.ColumnDefinitions>
 	                <ColumnDefinition  />
 	                <ColumnDefinition  />
 	                <ColumnDefinition  />
@@ -32,7 +43,7 @@
 	                <RowDefinition />
 	                <RowDefinition />
 	            </Grid.RowDefinitions>
-	        </Grid>
+            </Grid>
 		</Border>
         <Border Grid.Row="1" x:Name="CommandBorder" Margin="0,0,0,0" >
             <StackPanel  x:Name="CommandPanel"  Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Right">

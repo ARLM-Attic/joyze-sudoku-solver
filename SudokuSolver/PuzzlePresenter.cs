@@ -8,6 +8,7 @@ using System.Windows;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
+using System.Windows.Media.Animation;
 
 namespace SudokuSolver
 {
@@ -168,7 +169,12 @@ namespace SudokuSolver
                     _board[row, col].IsStart = true;
                     _board[row, col].Value = key;
                 }
+                else
+                    FlashBorder(_KeyboardBorderFocus);
+
+
                 SetFontSize(_KeyboardBorderFocus);
+
             }
         }
 
@@ -267,6 +273,24 @@ namespace SudokuSolver
                     break;
             }
         }
+
+        /// ==================================================================================
+        /// Animation
+        /// ==================================================================================
+
+        private void FlashBorder(Border border)
+        {
+            Storyboard sb = (Storyboard)_puzzleGrid.FindResource("Flash");
+            ColorAnimationUsingKeyFrames ca = (ColorAnimationUsingKeyFrames) _puzzleGrid.FindName("ColourCycle");
+
+            sb.Stop();
+            Storyboard.SetTarget(ca, border);
+            sb.Begin();
+        }
+
+        /// ==================================================================================
+        /// Helper Methods
+        /// ==================================================================================
 
         private bool FindSquareRowCol(SquareViewModel square, ref int row, ref int col)
         {
