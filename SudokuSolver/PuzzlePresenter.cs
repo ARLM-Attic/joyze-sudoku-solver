@@ -55,6 +55,12 @@ namespace SudokuSolver
 
                     SetFontSize(sqBorder);
 
+                    // add render transform to textblock for animations
+                    TransformGroup tg = new TransformGroup();
+                    tg.Children.Add(new ScaleTransform());
+                    tg.Children.Add(new TranslateTransform());
+                    sqText.RenderTransform = tg;
+
                     // keep track of these borders in an array
                     _puzzleBorder[row, col] = sqBorder;
 
@@ -71,6 +77,9 @@ namespace SudokuSolver
 
                     // bind PuzzlePresenter to Square property change notification
                     _board[row, col].PropertyChanged += new PropertyChangedEventHandler(square_PropertyChanged);
+
+                    // bind PuzzlePresenter to BoardViewModel activity events
+                    _board.ActivityEvent += new ActivityEventHandler(board_Activity);
                 }
         }
 
@@ -199,7 +208,7 @@ namespace SudokuSolver
         {
             if (_KeyboardBorderFocus != null)
             {
-                ((Border)_KeyboardBorderFocus).Background = Brushes.White;
+                ((Border)_KeyboardBorderFocus).Background = Brushes.Transparent;
                 _KeyboardBorderFocus = null;
             }
         }
@@ -281,11 +290,25 @@ namespace SudokuSolver
         private void FlashBorder(Border border)
         {
             Storyboard sb = (Storyboard)_puzzleGrid.FindResource("Flash");
-            ColorAnimationUsingKeyFrames ca = (ColorAnimationUsingKeyFrames) _puzzleGrid.FindName("ColourCycle");
+            border.BeginStoryboard(sb);
+        }
 
-            sb.Stop();
-            Storyboard.SetTarget(ca, border);
-            sb.Begin();
+        private void Zoom(Border border)
+        {
+            Storyboard sb = (Storyboard)_puzzleGrid.FindResource("Zoom");
+            ((TextBlock) border.Child).BeginStoryboard(sb);
+
+        }
+
+        void board_Activity(object sender, ActivityEventArgs e)
+        {
+            switch (e.Activity)
+            {
+                case "ReadStep":
+                    Border bdr = _puzzleBorder[e.Row, e.Column];
+                    Zoom(bdr);
+                    break;
+            }
         }
 
         /// ==================================================================================

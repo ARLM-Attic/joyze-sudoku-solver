@@ -6,9 +6,46 @@ using System.Text;
 
 namespace SudokuSolver
 {
+    public class ActivityEventArgs : EventArgs
+    {
+        public string Activity;
+        public int Row;
+        public int Column;
+        public int Value;
+
+        public ActivityEventArgs(string activity)
+        {
+            Activity = activity;
+        }
+
+        public ActivityEventArgs(string activity, int row, int col, int val)
+        {
+            Activity = activity;
+            Row = row;
+            Column = col;
+            Value = val;
+        }
+    }
+
+    public delegate void ActivityEventHandler(object sender, ActivityEventArgs e);
+
     class BoardViewModel
     {
         private SquareViewModel[,] _square;
+
+        public event ActivityEventHandler ActivityEvent;
+
+        protected void NotifyActivity(string act)
+        {
+            if (ActivityEvent != null)
+                ActivityEvent(this, new ActivityEventArgs(act));
+        }
+
+        protected void NotifyActivity(string act, int row, int col, int val)
+        {
+            if (ActivityEvent != null)
+                ActivityEvent(this, new ActivityEventArgs(act, row, col, val));
+        }
 
         public BoardViewModel()
         {
@@ -35,9 +72,13 @@ namespace SudokuSolver
         {
             if (step >= 0 && step < changes.Count)
             {
-                SquareViewModel sq = _square[changes[step].Row, changes[step].Col];
+                int row = changes[step].Row;
+                int col = changes[step].Col;
+                int val = changes[step].Value;
+                SquareViewModel sq = _square[row, col];
                 sq.IsKnown = true;
-                sq.Value = changes[step].Value.ToString();
+                sq.Value = val.ToString();
+                NotifyActivity("ReadStep", row, col, val);
             }
             if (GameSettings.Settings.IsCandidatesDisplayed)
                 SetCandidates();

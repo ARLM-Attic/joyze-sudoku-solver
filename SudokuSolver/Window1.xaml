@@ -20,6 +20,12 @@
                             <DiscreteColorKeyFrame  KeyTime="00:00:00.4500000" Value="White"/>
                         </ColorAnimationUsingKeyFrames>
                     </Storyboard>
+                    <Storyboard x:Key="Zoom">
+                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" From="3" To="1" Duration="0:0:0.2" />
+                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" From="3" To="1" Duration="0:0:0.2" />
+                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.X)" From="-50" To="0" Duration="0:0:0.2" />
+                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" From="-50" To="0" Duration="0:0:0.2" />
+                    </Storyboard>
                 </Grid.Resources>
                 <Grid.ColumnDefinitions>
 	                <ColumnDefinition  />
