@@ -53,9 +53,6 @@ namespace SudokuSolver
             for (int row = 0; row < 9; row++)
                 for (int col = 0; col < 9; col++)
                     _square[row, col] = new SquareViewModel();
-
-            //watch for game settings changes
-            GameSettings.Settings.PropertyChanged += settings_PropertyChanged;
         }
 
         public void Read(BoardChangeList changes)
@@ -161,27 +158,7 @@ namespace SudokuSolver
             get { return _square[row, col] ; }
         }
 
-        public void Square_Changed()
-        {
-        }
-
-        void settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            switch (e.PropertyName)
-            {
-                case "IsCandidatesDisplayed":
-
-                    if (GameSettings.Settings.IsCandidatesDisplayed)
-                        SetCandidates();
-
-                    for (int row = 0; row < 9; row++)
-                        for (int col = 0; col < 9; col++)
-                            _square[row, col].Refresh();
-                    break;
-            }
-        }
-
-        private void SetCandidates()
+        public void SetCandidates()
         {
             for (int row = 0; row < 9; row++)
                 for (int col = 0; col < 9; col++)
@@ -194,7 +171,7 @@ namespace SudokuSolver
                         if (digits[i])
                             sq.Candidates.Add(i);
                     }
-                    sq.Refresh();
+                    sq.RefreshCandidates();
                 }
         }
 

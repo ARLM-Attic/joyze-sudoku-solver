@@ -20,10 +20,17 @@ namespace SudokuSolver
     
     public partial class Window1 : Window
     {
+        // UI mode
         public enum GameMode { EnterPuzzle, Play, EndPlay };
         GameMode _puzzleMode = GameMode.EnterPuzzle;
+
+        // the game object used to solve sudoku puzzles
         SudokuGame _sudoku = new SudokuGame();
+
+        // logical model of the board
         BoardViewModel _board = new BoardViewModel();
+
+        // presentation model of the board
         PuzzlePresenter _puzzle;
 
         int _sudokuStep;
@@ -137,6 +144,7 @@ namespace SudokuSolver
             _sudoku.ChangeList.Clear();
             _puzzleMode = GameMode.EnterPuzzle;
             _puzzle.Mode = PuzzlePresenter.PuzzleMode.Design;
+            _puzzle.Reset();
             SetControlStates();
         }
 

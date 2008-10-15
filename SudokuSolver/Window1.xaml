@@ -15,16 +15,22 @@
                     <Storyboard x:Key="Flash">
                         <ColorAnimationUsingKeyFrames BeginTime="00:00:00" x:Name="ColourCycle" FillBehavior="Stop" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" >
                             <DiscreteColorKeyFrame  KeyTime="00:00:00.0000000" Value="Red"/>
-                            <DiscreteColorKeyFrame  KeyTime="00:00:00.1500000" Value="White"/>
+                            <DiscreteColorKeyFrame  KeyTime="00:00:00.1500000" Value="Transparent"/>
                             <DiscreteColorKeyFrame  KeyTime="00:00:00.3000000" Value="Red"/>
-                            <DiscreteColorKeyFrame  KeyTime="00:00:00.4500000" Value="White"/>
+                            <DiscreteColorKeyFrame  KeyTime="00:00:00.4500000" Value="Transparent"/>
                         </ColorAnimationUsingKeyFrames>
                     </Storyboard>
-                    <Storyboard x:Key="Zoom">
+                    <Storyboard x:Key="ZoomOut">
                         <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" From="3" To="1" Duration="0:0:0.2" />
                         <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" From="3" To="1" Duration="0:0:0.2" />
-                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.X)" From="-50" To="0" Duration="0:0:0.2" />
-                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" From="-50" To="0" Duration="0:0:0.2" />
+                        <DoubleAnimation x:Name="ZoomOutX" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.X)" From="-50" To="0" Duration="0:0:0.2" />
+                        <DoubleAnimation x:Name="ZoomOutY" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" From="-50" To="0" Duration="0:0:0.2" />
+                    </Storyboard>
+                    <Storyboard x:Key="ZoomIn">
+                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)" From="0.5" To="1" Duration="0:0:0.1" />
+                        <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleY)" From="0.5" To="1" Duration="0:0:0.1" />
+                        <DoubleAnimation x:Name="ZoomInX" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.X)" From="0" To="0" Duration="0:0:0.1" />
+                        <DoubleAnimation x:Name="ZoomInY" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" From="0" To="0" Duration="0:0:0.1" />
                     </Storyboard>
                 </Grid.Resources>
                 <Grid.ColumnDefinitions>

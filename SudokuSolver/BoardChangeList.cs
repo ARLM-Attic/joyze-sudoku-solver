@@ -15,7 +15,7 @@ namespace SudokuSolver
 
         public void AddKnown(int row, int col, int value)
         {
-            this.Add(new BoardStateChange(BoardStateChange.StateChange.Set, row, col, value));
+            this.Add(new BoardStateChange() { Operation = BoardStateChange.StateChange.Set, Row = row, Col = col, Value = value });
         }
     }
 }

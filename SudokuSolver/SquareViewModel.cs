@@ -48,10 +48,7 @@ namespace SudokuSolver
         {
             get
             {
-                if (_value == String.Empty && GameSettings.Settings.IsCandidatesDisplayed)
-                    return _candidates.ToString();
-                else
-                    return _value;
+                return _value;
             }
             set
             {
@@ -60,9 +57,9 @@ namespace SudokuSolver
             }
         }
 
-        public void Refresh()
+        public void RefreshCandidates()
         {
-            Notify("Value");
+            Notify("Candidates");
         }
 
         public int ToInt()

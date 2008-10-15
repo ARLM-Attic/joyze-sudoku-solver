@@ -5,6 +5,9 @@ using System.Text;
 
 namespace SudokuSolver
 {
+    // Board model used by Sudoku game to solve the puzzle.
+    // This is a different from BoardViewModel which is the board model used for presentation
+
     class SudokuBoard
     {
         PossibleSet[,] _square = null;

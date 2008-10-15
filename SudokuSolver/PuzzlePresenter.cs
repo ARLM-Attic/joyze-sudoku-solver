@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.ComponentModel;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
 
 namespace SudokuSolver
 {
@@ -28,6 +29,12 @@ namespace SudokuSolver
             _puzzleGrid = container;
             _board = boardmodel;
             CreatePuzzle();
+
+            // consume BoardViewModel property change notifications
+            _board.ActivityEvent += new ActivityEventHandler(board_Activity);
+
+            // consume GameSettings property change notifications
+            GameSettings.Settings.PropertyChanged += settings_PropertyChanged;
         }
 
         private void CreatePuzzle()
@@ -55,7 +62,7 @@ namespace SudokuSolver
 
                     SetFontSize(sqBorder);
 
-                    // add render transform to textblock for animations
+                    // add render transforms to textblock for animations
                     TransformGroup tg = new TransformGroup();
                     tg.Children.Add(new ScaleTransform());
                     tg.Children.Add(new TranslateTransform());
@@ -69,17 +76,11 @@ namespace SudokuSolver
                     Grid.SetColumn(sqBorder, col);
                     _puzzleGrid.Children.Add(sqBorder);
 
-                    // bind textblock to Board/Square view model
-                    Binding bind = new Binding();
-                    bind.Source = _board[row, col];
-                    bind.Path = new PropertyPath("Value");
-                    sqText.SetBinding(TextBlock.TextProperty, bind);
+                    // bind textblock to SquareViewModel
+                    BindToSquare(sqBorder, _board[row, col]);
 
-                    // bind PuzzlePresenter to Square property change notification
+                    // consume SquareViewModel property change notifications
                     _board[row, col].PropertyChanged += new PropertyChangedEventHandler(square_PropertyChanged);
-
-                    // bind PuzzlePresenter to BoardViewModel activity events
-                    _board.ActivityEvent += new ActivityEventHandler(board_Activity);
                 }
         }
 
@@ -161,14 +162,14 @@ namespace SudokuSolver
         }
 
         /// ==================================================================================
-        /// Key Input Handling
+        /// Event Handling
         /// ==================================================================================
         
         public void KeyPress(string key)
         {
             if (this.Mode == PuzzleMode.Design && _KeyboardBorderFocus != null)
             {
-                //change the BoardViewModel
+                //update the BoardViewModel
                 int row = Grid.GetRow(_KeyboardBorderFocus);
                 int col = Grid.GetColumn(_KeyboardBorderFocus);
 
@@ -177,6 +178,7 @@ namespace SudokuSolver
                     _board[row, col].IsKnown = true;
                     _board[row, col].IsStart = true;
                     _board[row, col].Value = key;
+                    ZoomIn(_KeyboardBorderFocus);
                 }
                 else
                     FlashBorder(_KeyboardBorderFocus);
@@ -193,6 +195,18 @@ namespace SudokuSolver
             {
                 _KeyboardBorderFocus = (Border)sender;
                 _KeyboardBorderFocus.Background = Brushes.Yellow;
+
+                //experiment with bitmap effect
+                /*
+                OuterGlowBitmapEffect effect = new OuterGlowBitmapEffect();
+                effect.GlowColor = Brushes.Yellow.Color;
+                effect.GlowSize = 20;
+                effect.Noise = 0;
+                effect.Opacity = .7;
+                effect.Freeze();
+
+                _KeyboardBorderFocus.BitmapEffect = effect;
+                 */
             }
         }
 
@@ -208,9 +222,26 @@ namespace SudokuSolver
         {
             if (_KeyboardBorderFocus != null)
             {
-                ((Border)_KeyboardBorderFocus).Background = Brushes.Transparent;
+                ((Border)_KeyboardBorderFocus).Background = Brushes.Transparent; 
+                ((Border)_KeyboardBorderFocus).BitmapEffect = null;
                 _KeyboardBorderFocus = null;
             }
+        }
+
+        public void SizeChanged()
+        {
+            ProcessSquares(new SquareOperation(Resize));
+        }
+
+        /// ==================================================================================
+        /// Commands
+        /// ==================================================================================
+
+        public void Reset()
+        {
+            for (int row = 0; row < 9; row++)
+                for (int col = 0; col < 9; col++)
+                    BindToSquare(_puzzleBorder[row, col], _board[row, col]);
         }
 
         /// ==================================================================================
@@ -266,12 +297,45 @@ namespace SudokuSolver
                 tb.Foreground = Brushes.Black;
         }
 
-        public void SizeChanged()
+
+        /// ==================================================================================
+        /// Animations
+        /// ==================================================================================
+
+        private void FlashBorder(Border border)
         {
-            ProcessSquares(new SquareOperation(Resize));
+            Storyboard sb = (Storyboard)_puzzleGrid.FindResource("Flash");
+            border.BeginStoryboard(sb);
         }
 
+        private void ZoomIn(Border border)
+        {
+            Storyboard sb = (Storyboard)_puzzleGrid.FindResource("ZoomIn");
+            DoubleAnimation daX = (DoubleAnimation)_puzzleGrid.FindName("ZoomInX");
+            DoubleAnimation daY = (DoubleAnimation)_puzzleGrid.FindName("ZoomInY");
+            daX.From = border.ActualWidth/4;
+            daY.From = border.ActualHeight/4;
+            ((TextBlock)border.Child).BeginStoryboard(sb);
+
+        }
+
+        private void ZoomOut(Border border)
+        {
+            Storyboard sb = (Storyboard)_puzzleGrid.FindResource("ZoomOut");
+            DoubleAnimation daX = (DoubleAnimation)_puzzleGrid.FindName("ZoomOutX");
+            DoubleAnimation daY = (DoubleAnimation)_puzzleGrid.FindName("ZoomOutY");
+            daX.From = -1 * border.ActualWidth;
+            daY.From = -1 * border.ActualHeight;
+            ((TextBlock) border.Child).BeginStoryboard(sb);
+
+        }
+
+        /// ==================================================================================
+        /// Event Notification Consumer Methods
+        /// ==================================================================================
+
         void square_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        // watch SquareViewModel changes
         {
             switch (e.PropertyName)
             {
@@ -283,30 +347,32 @@ namespace SudokuSolver
             }
         }
 
-        /// ==================================================================================
-        /// Animation
-        /// ==================================================================================
-
-        private void FlashBorder(Border border)
-        {
-            Storyboard sb = (Storyboard)_puzzleGrid.FindResource("Flash");
-            border.BeginStoryboard(sb);
-        }
-
-        private void Zoom(Border border)
-        {
-            Storyboard sb = (Storyboard)_puzzleGrid.FindResource("Zoom");
-            ((TextBlock) border.Child).BeginStoryboard(sb);
-
-        }
-
         void board_Activity(object sender, ActivityEventArgs e)
+        // watch BoardViewModel changes
         {
             switch (e.Activity)
             {
                 case "ReadStep":
                     Border bdr = _puzzleBorder[e.Row, e.Column];
-                    Zoom(bdr);
+                    ZoomOut(bdr);
+                    BindToSquare(bdr, _board[e.Row, e.Column]);
+                    break;
+            }
+        }
+
+        void settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        // watch GameSettings changes
+        {
+            switch (e.PropertyName)
+            {
+                case "IsCandidatesDisplayed":
+
+                    if (GameSettings.Settings.IsCandidatesDisplayed)
+                        _board.SetCandidates();
+
+                    for (int row = 0; row < 9; row++)
+                        for (int col = 0; col < 9; col++)
+                            BindToSquare(_puzzleBorder[row, col], _board[row, col]);
                     break;
             }
         }
@@ -314,6 +380,28 @@ namespace SudokuSolver
         /// ==================================================================================
         /// Helper Methods
         /// ==================================================================================
+
+        private void BindToSquare(Border border, SquareViewModel square)
+        {
+            if (GameSettings.Settings.IsCandidatesDisplayed &&
+                _puzzleMode == PuzzleMode.Play &&
+                !square.IsKnown)
+            {
+                BindToSquareViewModel(border, square, "Candidates");
+            }
+            else
+                BindToSquareViewModel(border, square, "Value");
+        }
+
+        private void BindToSquareViewModel(Border border, SquareViewModel square, string property)
+        {
+            Binding bind = new Binding();
+            bind.Source = square;
+            bind.Path = new PropertyPath(property);
+            bind.Mode = BindingMode.OneWay;
+            ((TextBlock) border.Child).SetBinding(TextBlock.TextProperty, bind);
+        }
+
 
         private bool FindSquareRowCol(SquareViewModel square, ref int row, ref int col)
         {
