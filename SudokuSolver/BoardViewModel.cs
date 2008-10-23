@@ -76,9 +76,8 @@ namespace SudokuSolver
                 sq.IsKnown = true;
                 sq.Value = val.ToString();
                 NotifyActivity("ReadStep", row, col, val);
-            }
-            if (GameSettings.Settings.IsCandidatesDisplayed)
                 SetCandidates();
+            }
         }
 
         public int Write(BoardChangeList changes)
@@ -109,6 +108,7 @@ namespace SudokuSolver
                 for (int col = 0; col < 9; col++)
                     if (!_square[row,col].IsStart)
                         _square[row, col].Reset();
+            SetCandidates();
         }
 
         private bool[] CalcCandidates(int row, int col)

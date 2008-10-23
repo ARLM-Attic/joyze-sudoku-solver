@@ -40,7 +40,7 @@ namespace SudokuSolver
             if (Object.ReferenceEquals(this, obj)) return true;
             if (this.GetType() != obj.GetType()) return false;
 
-            //test for value equality of count and the digits array
+            // test for value equality of count and the digits array
             PossibleSet set = (PossibleSet)obj;
             if (set.Count != this.Count)
                 return false;
@@ -104,6 +104,20 @@ namespace SudokuSolver
             }
         }
 
+        public string this[int digit]
+        {
+            get
+            {
+                if (digit > 0 && digit < 10)
+                    if (_digits[digit])
+                        return digit.ToString();
+                    else
+                        return String.Empty;
+                else
+                    return String.Empty;
+            }
+        }
+
         public bool Contains(int value)
         {
             if (value > 0 && value < 10)
@@ -112,6 +126,7 @@ namespace SudokuSolver
                 return false;
         }
 
+        /*
         public override string ToString()
         {
             string str = String.Empty;
@@ -125,6 +140,7 @@ namespace SudokuSolver
             }
             return str;
         }
+        */
 
         public string ToDebugString()
         {

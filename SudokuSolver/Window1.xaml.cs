@@ -39,9 +39,6 @@ namespace SudokuSolver
         {
             InitializeComponent();
             this.KeyDown += new KeyEventHandler(Window1_KeyDown);
-
-            //attach databinding context to window
-            this.DataContext = GameSettings.Settings;
         }
 
         private void WindowLoaded(object sender, RoutedEventArgs e)
@@ -144,7 +141,7 @@ namespace SudokuSolver
             _sudoku.ChangeList.Clear();
             _puzzleMode = GameMode.EnterPuzzle;
             _puzzle.Mode = PuzzlePresenter.PuzzleMode.Design;
-            _puzzle.Reset();
+            GameSettings.Settings.IsCandidatesDisplayed = false;
             SetControlStates();
         }
 

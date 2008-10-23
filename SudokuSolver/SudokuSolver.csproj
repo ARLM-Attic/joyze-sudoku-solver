@@ -118,6 +118,7 @@
       <DependentUpon>DebugWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="GameSettings.cs" />
+    <Compile Include="HeightToFontSizeConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

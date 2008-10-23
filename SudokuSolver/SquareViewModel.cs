@@ -27,14 +27,14 @@ namespace SudokuSolver
         public bool IsStart
         {
             get { return _isstart; }
-            set { _isstart = value; }
+            set { _isstart = value; Notify("IsStart"); }
         }
 
         private bool _isknown = false;
         public bool IsKnown
         {
             get { return _isknown; }
-            set { _isknown = value; }
+            set { _isknown = value; Notify("IsKnown"); }
         }
 
         private PossibleSet _candidates;

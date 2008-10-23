@@ -2,8 +2,12 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="Joyze Sudoku Solver"  SizeToContent="WidthAndHeight" Topmost="True" Height="500" Icon="sudoku.ico"
-    MinWidth="400" MinHeight="500" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" d:DesignWidth="401" Loaded="WindowLoaded" SizeChanged="Window_SizeChanged">
-
+    MinWidth="400" MinHeight="500"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:SudokuSolver"
+    mc:Ignorable="d" d:DesignWidth="401" Loaded="WindowLoaded" SizeChanged="Window_SizeChanged">
+    
     <Grid MinWidth="200" Background="#FF93C4D9">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" MinHeight="200"/>
@@ -12,6 +16,59 @@
 		<Border Grid.Row="0" x:Name="PuzzleBorder" BorderBrush="#FF000000" BorderThickness="2,2,2,2" CornerRadius="2,2,2,2" Margin="4,4,4,4" Background="#FFFFFFFF">
 	        <Grid x:Name="PuzzleGrid" ShowGridLines="False" SnapsToDevicePixels="False" Margin="0,0,0,0" >
                 <Grid.Resources>
+
+                    <Style x:Key="ValueSquareStyle" TargetType="{x:Type TextBlock}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Path=IsStart}" Value="True">
+                                <Setter Property="Foreground" Value="DarkBlue" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Path=IsStart}" Value="False">
+                                <Setter Property="Foreground" Value="Black" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                    
+                    <Style x:Key="FocusBorderStyle" TargetType="{x:Type Border}">
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="Yellow" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                    
+                    <local:HeightToFontSizeConverter x:Key="fontsizeConverter" />
+                    
+                    <DataTemplate x:Key="squareValueTemplate">
+                        <TextBlock Text="{Binding Path=Value}" TextAlignment="Center" Style="{StaticResource ValueSquareStyle}" FontSize="{Binding RelativeSource={RelativeSource Self}, Path=ActualHeight, Converter={StaticResource fontsizeConverter}}" />
+                    </DataTemplate>
+
+                    <DataTemplate x:Key="squareCandidatesTemplate">
+                        <UniformGrid TextBlock.TextAlignment="Center">
+                            <TextBlock Text="{Binding Path=Candidates[1]}"/>
+                            <TextBlock Text="{Binding Path=Candidates[2]}"/>
+                            <TextBlock Text="{Binding Path=Candidates[3]}"/>
+                            <TextBlock Text="{Binding Path=Candidates[4]}"/>
+                            <TextBlock Text="{Binding Path=Candidates[5]}"/>
+                            <TextBlock Text="{Binding Path=Candidates[6]}"/>
+                            <TextBlock Text="{Binding Path=Candidates[7]}"/>
+                            <TextBlock Text="{Binding Path=Candidates[8]}"/>
+                            <TextBlock Text="{Binding Path=Candidates[9]}"/>
+                        </UniformGrid>
+                    </DataTemplate>
+                    
+                    <DataTemplate DataType="{x:Type local:SquareViewModel}">
+                        <ContentPresenter Content="{Binding}" Name="cp" ContentTemplate="{StaticResource squareValueTemplate}"/>
+                        <DataTemplate.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding Path=IsCandidatesDisplayed, Source={StaticResource GameSettings}}" Value="True" />
+                                    <Condition Binding="{Binding Path=IsKnown}" Value="False" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter TargetName="cp" Property="ContentTemplate" Value="{StaticResource squareCandidatesTemplate}" />
+                            </MultiDataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                    
                     <Storyboard x:Key="Flash">
                         <ColorAnimationUsingKeyFrames BeginTime="00:00:00" x:Name="ColourCycle" FillBehavior="Stop" Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" >
                             <DiscreteColorKeyFrame  KeyTime="00:00:00.0000000" Value="Red"/>
@@ -32,6 +89,7 @@
                         <DoubleAnimation x:Name="ZoomInX" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.X)" From="0" To="0" Duration="0:0:0.1" />
                         <DoubleAnimation x:Name="ZoomInY" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[1].(TranslateTransform.Y)" From="0" To="0" Duration="0:0:0.1" />
                     </Storyboard>
+
                 </Grid.Resources>
                 <Grid.ColumnDefinitions>
 	                <ColumnDefinition  />
@@ -61,7 +119,7 @@
             <StackPanel  x:Name="CommandPanel"  Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Right">
                 <Border BorderThickness="2" CornerRadius="2,2,2,2" Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="4" BorderBrush="PowderBlue">
                     <StackPanel  x:Name="StepPanel"  Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Right">
-                        <CheckBox x:Name="chkShowCandidates" Margin="0,0,20,0" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Mode=TwoWay,Path=IsCandidatesDisplayed}">Show Candidates</CheckBox>
+                        <CheckBox x:Name="chkShowCandidates" Margin="0,0,20,0" HorizontalAlignment="Center" VerticalAlignment="Center" IsChecked="{Binding Mode=TwoWay,Path=IsCandidatesDisplayed,Source={StaticResource GameSettings}}">Show Candidates</CheckBox>
                         <Button Height="25" x:Name="cmdStep" Width="70" Content="Step" Margin="10,0,10,0" Click="cmdStep_Click" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </StackPanel>
                 </Border>
