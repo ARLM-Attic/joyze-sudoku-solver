@@ -29,6 +29,7 @@
                     </Style>
                     
                     <Style x:Key="FocusBorderStyle" TargetType="{x:Type Border}">
+                        <Setter Property="BorderBrush" Value="Black" />
                         <Style.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="Yellow" />
@@ -39,11 +40,15 @@
                     <local:HeightToFontSizeConverter x:Key="fontsizeConverter" />
                     
                     <DataTemplate x:Key="squareValueTemplate">
-                        <TextBlock Text="{Binding Path=Value}" TextAlignment="Center" Style="{StaticResource ValueSquareStyle}" FontSize="{Binding RelativeSource={RelativeSource Self}, Path=ActualHeight, Converter={StaticResource fontsizeConverter}}" />
+                        <TextBlock Text="{Binding Path=Value}"
+                                   TextAlignment="Center"
+                                   Style="{StaticResource ValueSquareStyle}"
+                                   FontSize="{Binding RelativeSource={RelativeSource Self}, Path=ActualHeight, Converter={StaticResource fontsizeConverter}}" 
+                         />
                     </DataTemplate>
 
                     <DataTemplate x:Key="squareCandidatesTemplate">
-                        <UniformGrid TextBlock.TextAlignment="Center">
+                        <UniformGrid VerticalAlignment="Top" HorizontalAlignment="Left" Margin="5,5">
                             <TextBlock Text="{Binding Path=Candidates[1]}"/>
                             <TextBlock Text="{Binding Path=Candidates[2]}"/>
                             <TextBlock Text="{Binding Path=Candidates[3]}"/>

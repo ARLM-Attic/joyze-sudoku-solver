@@ -56,6 +56,7 @@ namespace SudokuSolver
                 cmdSolve.Content = "Start";
                 cmdStep.IsEnabled = false;
                 chkShowCandidates.IsEnabled = false;
+                GameSettings.Settings.IsCandidatesDisplayed = false;
             }
             else if (_puzzleMode == GameMode.Play)
             {
@@ -66,8 +67,8 @@ namespace SudokuSolver
             else // GameMode.EndPlay
             {
                 cmdSolve.Content = "Replay";
-                GameSettings.Settings.IsCandidatesDisplayed = false;
-                chkShowCandidates.IsEnabled = false;
+                //GameSettings.Settings.IsCandidatesDisplayed = false;
+                //chkShowCandidates.IsEnabled = false;
                 cmdStep.IsEnabled = false;
             }
         }

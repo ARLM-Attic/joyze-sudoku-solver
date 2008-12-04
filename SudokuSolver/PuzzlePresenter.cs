@@ -47,7 +47,6 @@ namespace SudokuSolver
                 for (int col = 0; col < 9; col++)
                 {
                     sqBorder = new Border();
-                    sqBorder.BorderBrush = Brushes.Black;
                     sqBorder.BorderThickness = CalcGridLineThickness(row, col);
                     sqBorder.Style = _puzzleGrid.FindResource("FocusBorderStyle") as Style;
 

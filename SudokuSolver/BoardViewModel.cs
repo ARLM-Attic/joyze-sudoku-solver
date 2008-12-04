@@ -63,6 +63,7 @@ namespace SudokuSolver
                 sq.IsKnown = true;
                 sq.Value = changes[i].Value.ToString();
             }
+            SetCandidates(); // incase solution is incomplete
         }
 
         public void Read(BoardChangeList changes, int step)
