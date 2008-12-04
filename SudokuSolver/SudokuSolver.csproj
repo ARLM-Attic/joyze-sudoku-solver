@@ -116,7 +116,6 @@
     <Compile Include="BoardChangeList.cs" />
     <Compile Include="BoardStateChange.cs" />
     <Compile Include="BoardViewModel.cs" />
-    <Compile Include="DatabaseSetup.cs" />
     <Compile Include="Debug.cs" />
     <Compile Include="DebugWindow.xaml.cs">
       <DependentUpon>DebugWindow.xaml</DependentUpon>
@@ -146,7 +145,6 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.config" />
-    <None Include="ClassDiagram1.cd" />
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
